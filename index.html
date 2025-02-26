@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>二月 To-Do List (Firebase)</title>
-    <!-- 引入 Firebase SDK -->
+    <!-- Firebase Core SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
-    
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -75,7 +75,7 @@
     </div>
 
     <script>
-        // 🔥【1】 初始化 Firebase
+        // 🔥 初始化 Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBGLtxpENokjVuiL9WXD1t8VZ6sv2XlhzU",
             authDomain: "temp-todolist.firebaseapp.com",
@@ -85,13 +85,16 @@
             appId: "1:436565517074:web:517a142d0d040303f6c9cb"
         };
 
-        // 🔥【2】 初始化 Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        document.getElementById("date").addEventListener("change", loadTasks);
+        console.log("✅ Firebase 已初始化");
 
-        // 🔥【3】 讀取 Firestore 資料
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("date").addEventListener("change", loadTasks);
+            loadTasks();
+        });
+
         function loadTasks() {
             let date = document.getElementById("date").value;
             let list = document.getElementById("todoList");
@@ -110,7 +113,6 @@
                 });
         }
 
-        // 🔥【4】 新增任務到 Firestore
         function addTask() {
             let date = document.getElementById("date").value;
             let taskInput = document.getElementById("taskInput");
@@ -127,14 +129,11 @@
             });
         }
 
-        // 🔥【5】 刪除 Firestore 任務
         function removeTask(taskId) {
             db.collection("tasks").doc(taskId).delete().then(() => {
                 loadTasks();
             });
         }
-
-        loadTasks();  // 預設載入選定日期的待辦事項
     </script>
 
 </body>
