@@ -1,140 +1,132 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>二月 To-Do List (Firebase)</title>
-    <!-- Firebase Core SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f8f9fa;
-        }
-        h1 {
-            color: #333;
-        }
-        select {
-            font-size: 16px;
-            padding: 5px;
-        }
-        .todo-container {
-            max-width: 400px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 5px;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px;
-            border-bottom: 1px solid #ddd;
-        }
-        button {
-            background-color: #ff4d4d;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-        }
-        input {
-            padding: 8px;
-            width: 80%;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>二月 To-Do List (Firebase)</title>
+  
+  <!-- 外部样式表 -->
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <h1>📅 2月 To-Do List (Firebase)</h1>
+  <h1>📅 2月 To-Do List (Firebase)</h1>
+  
+  <div class="todo-container">
+    <label for="date">選擇日期：</label>
+    <select id="date">
+      <option value="feb26">2月26日</option>
+      <option value="feb27">2月27日</option>
+      <option value="feb28">2月28日</option>
+    </select>
     
-    <div class="todo-container">
-        <label for="date">選擇日期：</label>
-        <select id="date">
-            <option value="feb26">2月26日</option>
-            <option value="feb27">2月27日</option>
-            <option value="feb28">2月28日</option>
-            <option value="feb29">2月29日</option>
-            <option value="feb30">2月30日</option>
-        </select>
-        
-        <br><br>
-        <input type="text" id="taskInput" placeholder="輸入待辦事項">
-        <button onclick="addTask()">新增</button>
-        
-        <ul id="todoList"></ul>
-    </div>
+    <br><br>
+    <input type="text" id="taskInput" placeholder="輸入待辦事項">
+    <button id="addBtn">新增</button>
+    
+    <ul id="todoList"></ul>
+  </div>
 
-    <script>
-        // 🔥 初始化 Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBGLtxpENokjVuiL9WXD1t8VZ6sv2XlhzU",
-            authDomain: "temp-todolist.firebaseapp.com",
-            projectId: "temp-todolist",
-            storageBucket: "temp-todolist.appspot.com",
-            messagingSenderId: "436565517074",
-            appId: "1:436565517074:web:517a142d0d040303f6c9cb"
-        };
+  <!-- 使用 ES Modules 的方式加载 Firebase SDK -->
+  <script type="module">
+    // 1. 导入 Firebase 所需模块
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      query,
+      orderBy,
+      serverTimestamp,
+      doc,
+      deleteDoc
+    } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+    // 2. Firebase 配置（使用你自己的项目信息）
+    const firebaseConfig = {
+      apiKey: "AIzaSyBWZzgBQul9MWpVfp3jl4jwCee-DX1zb0s",
+      authDomain: "temp-todo-list-7c25e.firebaseapp.com",
+      projectId: "temp-todo-list-7c25e",
+      storageBucket: "temp-todo-list-7c25e.firebasestorage.app",
+      messagingSenderId: "388844458714",
+      appId: "1:388844458714:web:5e9620d9d15c87458c0be3"
+    };
 
-        console.log("✅ Firebase 已初始化");
+    // 3. 初始化 Firebase 和 Firestore
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        document.addEventListener("DOMContentLoaded", function() {
-            document.getElementById("date").addEventListener("change", loadTasks);
-            loadTasks();
+    // 4. 获取页面元素
+    const dateSelect = document.getElementById("date");
+    const taskInput = document.getElementById("taskInput");
+    const addBtn = document.getElementById("addBtn");
+    const todoList = document.getElementById("todoList");
+
+    // 5. 页面加载后 & 日期切换时，加载对应日期的任务
+    document.addEventListener("DOMContentLoaded", () => {
+      dateSelect.addEventListener("change", loadTasks);
+      addBtn.addEventListener("click", addTask);
+      loadTasks(); // 默认加载当前下拉框选定日期的任务
+    });
+
+    // 6. 读取任务列表（从指定日期文档的 "tasks" 子集合）
+    async function loadTasks() {
+      const selectedDate = dateSelect.value;
+      todoList.innerHTML = ""; // 清空列表
+
+      // Firestore 路径：dates -> selectedDate -> tasks
+      const tasksCollection = collection(db, "dates", selectedDate, "tasks");
+      const q = query(tasksCollection, orderBy("timestamp", "asc"));
+
+      try {
+        const snapshot = await getDocs(q);
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          const li = document.createElement("li");
+          li.innerHTML = `
+            ${data.task}
+            <button onclick="removeTask('${docSnap.id}')">刪除</button>
+          `;
+          todoList.appendChild(li);
         });
+      } catch (error) {
+        console.error("Error loading tasks:", error);
+      }
+    }
 
-        function loadTasks() {
-            let date = document.getElementById("date").value;
-            let list = document.getElementById("todoList");
-            list.innerHTML = "";
+    // 7. 新增任务（添加到指定日期的 "tasks" 子集合）
+    async function addTask() {
+      const selectedDate = dateSelect.value;
+      const task = taskInput.value.trim();
+      if (!task) return;
 
-            db.collection("tasks").where("date", "==", date)
-                .orderBy("timestamp", "asc")
-                .get()
-                .then(snapshot => {
-                    snapshot.forEach(doc => {
-                        let data = doc.data();
-                        let li = document.createElement("li");
-                        li.innerHTML = `${data.task} <button onclick="removeTask('${doc.id}')">刪除</button>`;
-                        list.appendChild(li);
-                    });
-                });
-        }
+      try {
+        const tasksCollection = collection(db, "dates", selectedDate, "tasks");
+        await addDoc(tasksCollection, {
+          task: task,
+          timestamp: serverTimestamp()
+        });
+        taskInput.value = "";
+        loadTasks(); // 新增后刷新任务列表
+      } catch (error) {
+        console.error("Error adding task:", error);
+      }
+    }
 
-        function addTask() {
-            let date = document.getElementById("date").value;
-            let taskInput = document.getElementById("taskInput");
-            let task = taskInput.value.trim();
-            if (task === "") return;
-
-            db.collection("tasks").add({
-                date: date,
-                task: task,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
-                taskInput.value = "";
-                loadTasks();
-            });
-        }
-
-        function removeTask(taskId) {
-            db.collection("tasks").doc(taskId).delete().then(() => {
-                loadTasks();
-            });
-        }
-    </script>
+    // 8. 删除任务（从指定日期的 "tasks" 子集合中删除）
+    // 因为在 li 中使用了 onclick="removeTask('xxx')"
+    // 所以要把 removeTask 挂载到全局（window）对象上
+    window.removeTask = async function(taskId) {
+      const selectedDate = dateSelect.value;
+      try {
+        await deleteDoc(doc(db, "dates", selectedDate, "tasks", taskId));
+        loadTasks();
+      } catch (error) {
+        console.error("Error removing task:", error);
+      }
+    };
+  </script>
 
 </body>
 </html>
