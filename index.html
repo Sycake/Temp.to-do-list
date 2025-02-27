@@ -1,36 +1,224 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>二月 To-Do List (Firebase)</title>
-  
-  <!-- 外部样式表 -->
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>2月 Feb To-Do List (Firebase)</title>
+
+  <!-- 内嵌样式：只写 CSS，不要混入 HTML -->
+  <style>
+    /***************************************************
+     *  全局布局：三栏 (左侧栏、主内容、右侧栏)
+     ***************************************************/
+    body {
+      margin: 0;
+      padding: 0;
+      display: flex;           /* 将页面分为左右/中/右三个区 */
+      gap: 20px;               /* 栏间距 */
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    /* 左侧栏、右侧栏 */
+    .sidebar-left {
+      width: 20%;              /* 两侧栏各占20%，可按需调整 */
+      background-color: #ffffff;
+      padding: 50px;
+      box-sizing: border-box;
+    }
+    
+    .sidebar-right {
+      width: 20%;              /* 两侧栏各占20%，可按需调整 */
+      background-color: #ffffff;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+
+    /* 中间主内容区 */
+    .main-content {
+      flex: 1;                 /* 主内容区占剩余宽度 */
+      padding: 10px;
+      box-sizing: border-box;
+      text-align: center;      /* 让主内容居中 */
+    }
+
+    /***************************************************
+     *  左侧卡片样式 (时间、天气)
+     ***************************************************/
+    .time-section,
+    .weather-section {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      margin-bottom: 15px;     /* 卡片之间留些间距 */
+    }
+
+    .time-section h2,
+    .weather-section h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: #333;
+      border-bottom: 1px solid #eee; /* 标题下方细线 */
+      padding-bottom: 5px;
+    }
+
+    .time-display {
+      font-size: 16px;
+      color: #555;
+      margin-top: 5px;
+    }
+
+    /***************************************************
+     *  标题样式
+     ***************************************************/
+    h1, h2 {
+      margin: 0 0 10px 0;
+    }
+
+    /***************************************************
+     *  To-Do 容器与元素
+     ***************************************************/
+    .todo-container {
+      max-width: 500px;
+      margin: 0 auto;          /* 在主内容区内水平居中 */
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      border-radius: 5px;
+    }
+    .todo-container label {
+      font-weight: bold;
+    }
+
+    /* 输入框和按钮 */
+    #taskInput {
+      width: 70%;
+      padding: 6px;
+      box-sizing: border-box;
+    }
+    #addBtn {
+      background-color: #ff4d4d;
+      color: #fff;
+      border: none;
+      padding: 7px 12px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+
+    /* 待办列表 ul/li */
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin-top: 10px;
+    }
+    li {
+      background: #f0f0f0;
+      margin: 5px 0;
+      padding: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    li button {
+      background-color: #dc3545;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    /***************************************************
+     *  Habit Scorecard 表格
+     ***************************************************/
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 6px;
+      text-align: left;
+    }
+    table th {
+      background-color: #eee;
+    }
+  </style>
 </head>
 <body>
 
-  <h1>📅 2月Feb To-Do List (Firebase)</h1>
-  
-  <div class="todo-container">
-    <label for="date">選擇日期：</label>
-    <select id="date">
-      <option value="feb26">2月26日</option>
-      <option value="feb27">2月27日</option>
-      <option value="feb28">2月28日</option>
-      <option value="mar1">3月1日</option>
-    </select>
-    
-    <br><br>
-    <input type="text" id="taskInput" placeholder="輸入待辦事項">
-    <button id="addBtn">新增</button>
-    
-    <ul id="todoList"></ul>
+  <!-- 左侧：多伦多时间/天气 & 香港时间 -->
+  <div class="sidebar-left">
+    <!-- 多伦多时间卡片 -->
+    <div class="time-section">
+      <h2>Toronto Time</h2>
+      <div id="toronto-time" class="time-display">Loading...</div>
+    </div>
+
+    <!-- 香港时间卡片 -->
+    <div class="time-section">
+      <h2>Hong Kong Time</h2>
+      <div id="hongkong-time" class="time-display">Loading...</div>
+    </div>
+
+    <!-- 多伦多天气卡片 -->
+    <div class="weather-section">
+      <h2>Toronto Weather</h2>
+      <div id="toronto-weather">Sunny, 25°C (示例)</div>
+    </div>
   </div>
 
-  <!-- 使用 ES Modules 的方式加载 Firebase SDK -->
+  <!-- 中间：原来的 To-Do List -->
+  <div class="main-content">
+    <h1>2月 Feb To-Do List (Firebase)</h1>
+    
+    <div class="todo-container">
+      <label for="date">選擇日期：</label>
+      <select id="date">
+        <option value="feb26">2月26日</option>
+        <option value="feb27">2月27日</option>
+        <option value="feb28">2月28日</option>
+        <option value="mar1">3月1日</option>
+      </select>
+      
+      <br><br>
+      <input type="text" id="taskInput" placeholder="輸入待辦事項">
+      <button id="addBtn">新增</button>
+      
+      <ul id="todoList"></ul>
+    </div>
+  </div>
+
+  <!-- 右侧：Habit Scorecard -->
+  <div class="sidebar-right">
+    <h2>Habit Scorecard</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Cue</th>
+          <th>Craving</th>
+          <th>Response</th>
+          <th>Reward</th>
+        </tr>
+      </thead>
+      <tbody id="habitTableBody">
+        <tr>
+          <td>Example Cue</td>
+          <td>Example Craving</td>
+          <td>Example Response</td>
+          <td>Example Reward</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Firebase + Firestore + 前端逻辑 -->
   <script type="module">
-    // 1. 导入 Firebase 所需模块
+    /********************************
+     * 1. 导入 Firebase 所需模块
+     ********************************/
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
     import {
       getFirestore,
@@ -44,7 +232,9 @@
       deleteDoc
     } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
-    // 2. Firebase 配置（使用你自己的项目信息）
+    /********************************
+     * 2. Firebase 配置
+     ********************************/
     const firebaseConfig = {
       apiKey: "AIzaSyBWZzgBQul9MWpVfp3jl4jwCee-DX1zb0s",
       authDomain: "temp-todo-list-7c25e.firebaseapp.com",
@@ -54,29 +244,37 @@
       appId: "1:388844458714:web:5e9620d9d15c87458c0be3"
     };
 
-    // 3. 初始化 Firebase 和 Firestore
+    // 初始化 Firebase & Firestore
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // 4. 获取页面元素
+    /********************************
+     * 3. 获取页面元素
+     ********************************/
     const dateSelect = document.getElementById("date");
     const taskInput = document.getElementById("taskInput");
     const addBtn = document.getElementById("addBtn");
     const todoList = document.getElementById("todoList");
 
-    // 5. 页面加载后 & 日期切换时，加载对应日期的任务
+    // 页面加载后 & 日期切换时，加载对应日期的任务
     document.addEventListener("DOMContentLoaded", () => {
       dateSelect.addEventListener("change", loadTasks);
       addBtn.addEventListener("click", addTask);
-      loadTasks(); // 默认加载当前下拉框选定日期的任务
+      loadTasks(); // 默认载入当前选定日期的任务
+
+      // 启动时间刷新
+      setInterval(updateTimes, 1000);
+      updateTimes();
     });
 
-    // 6. 读取任务列表（从指定日期文档的 "tasks" 子集合）
+    /********************************
+     * 4. 读取任务列表
+     ********************************/
     async function loadTasks() {
       const selectedDate = dateSelect.value;
-      todoList.innerHTML = ""; // 清空列表
+      todoList.innerHTML = ""; // 先清空列表
 
-      // Firestore 路径：dates -> selectedDate -> tasks
+      // 指定子集合路径：dates -> selectedDate -> tasks
       const tasksCollection = collection(db, "dates", selectedDate, "tasks");
       const q = query(tasksCollection, orderBy("timestamp", "asc"));
 
@@ -96,7 +294,9 @@
       }
     }
 
-    // 7. 新增任务（添加到指定日期的 "tasks" 子集合）
+    /********************************
+     * 5. 新增任务
+     ********************************/
     async function addTask() {
       const selectedDate = dateSelect.value;
       const task = taskInput.value.trim();
@@ -109,15 +309,15 @@
           timestamp: serverTimestamp()
         });
         taskInput.value = "";
-        loadTasks(); // 新增后刷新任务列表
+        loadTasks(); // 刷新列表
       } catch (error) {
         console.error("Error adding task:", error);
       }
     }
 
-    // 8. 删除任务（从指定日期的 "tasks" 子集合中删除）
-    // 因为在 li 中使用了 onclick="removeTask('xxx')"
-    // 所以要把 removeTask 挂载到全局（window）对象上
+    /********************************
+     * 6. 删除任务
+     ********************************/
     window.removeTask = async function(taskId) {
       const selectedDate = dateSelect.value;
       try {
@@ -127,7 +327,29 @@
         console.error("Error removing task:", error);
       }
     };
-  </script>
 
+    /********************************
+     * 7. 更新多伦多 & 香港时间 (简易示例)
+     ********************************/
+    function updateTimes() {
+      const torontoTimeEl = document.getElementById("toronto-time");
+      const hongKongTimeEl = document.getElementById("hongkong-time");
+
+      // 获取当前UTC时间
+      const now = new Date();
+      const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+
+      // 多伦多可能是 UTC-5 或 UTC-4（夏令时），香港是 UTC+8
+      const torontoOffset = -5;  // -5 or -4
+      const hongKongOffset = 8;
+
+      // 计算对应时区的本地时间
+      const torontoDate = new Date(utcTime + 3600000 * torontoOffset);
+      const hongKongDate = new Date(utcTime + 3600000 * hongKongOffset);
+
+      torontoTimeEl.textContent = torontoDate.toLocaleString();
+      hongKongTimeEl.textContent = hongKongDate.toLocaleString();
+    }
+  </script>
 </body>
 </html>
