@@ -7,73 +7,64 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <!-- 左侧：多伦多时间/天气 & 香港时间 -->
-  <div class="sidebar-left">
-    <!-- 多伦多时间卡片 -->
-    <div class="time-section">
-      <h2>Toronto Time</h2>
-      <div id="toronto-time" class="time-display">Loading...</div>
+  <!-- 整个主页面内容 -->
+  <div id="mainContent" style="display: none;">
+    <!-- 左侧：多伦多时间/天气 & 香港时间 -->
+    <div class="sidebar-left">
+      <div class="time-section">
+        <h2>Toronto Time</h2>
+        <div id="toronto-time" class="time-display">Loading...</div>
+      </div>
+      <div class="time-section">
+        <h2>Hong Kong Time</h2>
+        <div id="hongkong-time" class="time-display">Loading...</div>
+      </div>
+      <div class="weather-section">
+        <h2>Toronto Weather</h2>
+        <div id="toronto-weather">Loading...</div>
+      </div>
     </div>
 
-    <!-- 香港时间卡片 -->
-    <div class="time-section">
-      <h2>Hong Kong Time</h2>
-      <div id="hongkong-time" class="time-display">Loading...</div>
+    <!-- 中间：To-Do List + 日历选择器 -->
+    <div class="main-content">
+      <h1>To-Do List (Firebase)</h1>
+      <div class="todo-container">
+        <label for="datePicker">选择日期：</label>
+        <input type="date" id="datePicker">
+        <br><br>
+        <input type="text" id="taskInput" placeholder="輸入待辦事項">
+        <button id="addBtn">新增</button>
+        <ul id="todoList"></ul>
+      </div>
     </div>
 
-    <!-- 多伦多天气卡片 -->
-    <div class="weather-section">
-      <h2>Toronto Weather</h2>
-      <div id="toronto-weather">Loading...</div>
+    <!-- 右侧：Habit Scorecard -->
+    <div class="sidebar-right">
+      <h2>Habit Scorecard</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Cue</th>
+            <th>Craving</th>
+            <th>Response</th>
+            <th>Reward</th>
+          </tr>
+        </thead>
+        <tbody id="habitTableBody">
+          <tr>
+            <td>Example Cue</td>
+            <td>Example Craving</td>
+            <td>Example Response</td>
+            <td>Example Reward</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 
-  <!-- 中间：To-Do List + 日历选择器 -->
-  <div class="main-content">
-    <h1>To-Do List (Firebase)</h1>
-    
-    <div class="todo-container">
-      <label for="datePicker">选择日期：</label>
-      <input type="date" id="datePicker">
-      
-      <br><br>
-      <input type="text" id="taskInput" placeholder="輸入待辦事項">
-      <button id="addBtn">新增</button>
-      
-      <ul id="todoList"></ul>
-    </div>
-  </div>
-
-  <!-- 右侧：Habit Scorecard -->
-  <div class="sidebar-right">
-    <h2>Habit Scorecard</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Cue</th>
-          <th>Craving</th>
-          <th>Response</th>
-          <th>Reward</th>
-        </tr>
-      </thead>
-      <tbody id="habitTableBody">
-        <tr>
-          <td>Example Cue</td>
-          <td>Example Craving</td>
-          <td>Example Response</td>
-          <td>Example Reward</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Firebase + Firestore + 前端逻辑 -->
   <script type="module">
-    /********************************
-     * 1. 导入 Firebase 所需模块
-     ********************************/
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
     import {
       getFirestore,
       collection,
@@ -86,9 +77,7 @@
       deleteDoc
     } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-firestore.js";
 
-    /********************************
-     * 2. Firebase 配置
-     ********************************/
+    // 请将下面的 Firebase 配置替换成你自己的配置
     const firebaseConfig = {
       apiKey: "AIzaSyBWZzgBQul9MWpVfp3jl4jwCee-DX1zb0s",
       authDomain: "temp-todo-list-7c25e.firebaseapp.com",
@@ -98,163 +87,132 @@
       appId: "1:388844458714:web:5e9620d9d15c87458c0be3"
     };
 
-    // 初始化 Firebase & Firestore
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const auth = getAuth(app);
 
-    /********************************
-     * 3. 获取页面元素
-     ********************************/
-    const datePicker = document.getElementById("datePicker");
-    const taskInput = document.getElementById("taskInput");
-    const addBtn = document.getElementById("addBtn");
-    const todoList = document.getElementById("todoList");
+    // 监听用户登录状态，若未登录则跳转到 login.html
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        document.getElementById("mainContent").style.display = "flex";
+        initApp();
+      } else {
+        window.location.href = "login.html";
+      }
+    });
 
-    // 页面加载后，设置默认日期为今天，并添加事件监听
-    document.addEventListener("DOMContentLoaded", () => {
-      // 默认设为当前日期
+    function initApp() {
+      const db = getFirestore(app);
+      const datePicker = document.getElementById("datePicker");
+      const taskInput = document.getElementById("taskInput");
+      const addBtn = document.getElementById("addBtn");
+      const todoList = document.getElementById("todoList");
+
+      // 设置默认日期并添加事件监听
       datePicker.valueAsDate = new Date();
       datePicker.addEventListener("change", loadTasks);
       addBtn.addEventListener("click", addTask);
-      loadTasks(); // 默认加载当前日期的任务
+      loadTasks();
 
-      // 启动时间刷新
+      // 启动时间和天气更新
       setInterval(updateTimes, 1000);
       updateTimes();
-
-      // 启动天气刷新
       updateWeather();
-      // 如需定时更新天气，可使用 setInterval(updateWeather, 600000);
-    });
 
-    /********************************
-     * 4. 读取任务列表
-     ********************************/
-    async function loadTasks() {
-      // 获取选择的日期，格式为 "YYYY-MM-DD"
-      const selectedDate = datePicker.value;
-      todoList.innerHTML = ""; // 清空列表
-
-      // 指定子集合路径：dates -> selectedDate -> tasks
-      const tasksCollection = collection(db, "dates", selectedDate, "tasks");
-      const q = query(tasksCollection, orderBy("timestamp", "asc"));
-
-      try {
-        const snapshot = await getDocs(q);
-        snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          const li = document.createElement("li");
-          li.innerHTML = `
-            ${data.task}
-            <button onclick="removeTask('${docSnap.id}')">刪除</button>
-          `;
-          todoList.appendChild(li);
-        });
-      } catch (error) {
-        console.error("Error loading tasks:", error);
-      }
-    }
-
-    /********************************
-     * 5. 新增任务
-     ********************************/
-    async function addTask() {
-      const selectedDate = datePicker.value;
-      const task = taskInput.value.trim();
-      if (!task) return;
-
-      try {
+      async function loadTasks() {
+        const selectedDate = datePicker.value;
+        todoList.innerHTML = "";
         const tasksCollection = collection(db, "dates", selectedDate, "tasks");
-        await addDoc(tasksCollection, {
-          task: task,
-          timestamp: serverTimestamp()
-        });
-        taskInput.value = "";
-        loadTasks(); // 刷新列表
-      } catch (error) {
-        console.error("Error adding task:", error);
+        const q = query(tasksCollection, orderBy("timestamp", "asc"));
+        try {
+          const snapshot = await getDocs(q);
+          snapshot.forEach((docSnap) => {
+            const data = docSnap.data();
+            const li = document.createElement("li");
+            li.innerHTML = `
+              ${data.task}
+              <button onclick="removeTask('${docSnap.id}')">刪除</button>
+            `;
+            todoList.appendChild(li);
+          });
+        } catch (error) {
+          console.error("Error loading tasks:", error);
+        }
       }
-    }
 
-    /********************************
-     * 6. 删除任务
-     ********************************/
-    window.removeTask = async function(taskId) {
-      const selectedDate = datePicker.value;
-      try {
-        await deleteDoc(doc(db, "dates", selectedDate, "tasks", taskId));
-        loadTasks();
-      } catch (error) {
-        console.error("Error removing task:", error);
+      async function addTask() {
+        const selectedDate = datePicker.value;
+        const task = taskInput.value.trim();
+        if (!task) return;
+        try {
+          const tasksCollection = collection(db, "dates", selectedDate, "tasks");
+          await addDoc(tasksCollection, {
+            task: task,
+            timestamp: serverTimestamp()
+          });
+          taskInput.value = "";
+          loadTasks();
+        } catch (error) {
+          console.error("Error adding task:", error);
+        }
       }
-    };
 
-    /********************************
-     * 7. 更新多伦多 & 香港时间 (简易示例)
-     ********************************/
-    function updateTimes() {
-      const torontoTimeEl = document.getElementById("toronto-time");
-      const hongKongTimeEl = document.getElementById("hongkong-time");
+      window.removeTask = async function(taskId) {
+        const selectedDate = datePicker.value;
+        try {
+          await deleteDoc(doc(db, "dates", selectedDate, "tasks", taskId));
+          loadTasks();
+        } catch (error) {
+          console.error("Error removing task:", error);
+        }
+      };
 
-      // 获取当前UTC时间
-      const now = new Date();
-      const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+      function updateTimes() {
+        const torontoTimeEl = document.getElementById("toronto-time");
+        const hongKongTimeEl = document.getElementById("hongkong-time");
+        const now = new Date();
+        const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
+        const torontoOffset = -5;
+        const hongKongOffset = 8;
+        const torontoDate = new Date(utcTime + 3600000 * torontoOffset);
+        const hongKongDate = new Date(utcTime + 3600000 * hongKongOffset);
+        torontoTimeEl.textContent = torontoDate.toLocaleString();
+        hongKongTimeEl.textContent = hongKongDate.toLocaleString();
+      }
 
-      // 多伦多可能是 UTC-5（标准时间）或 UTC-4（夏令时），这里假设标准时间
-      const torontoOffset = -5;
-      const hongKongOffset = 8;
-
-      // 计算对应时区的本地时间
-      const torontoDate = new Date(utcTime + 3600000 * torontoOffset);
-      const hongKongDate = new Date(utcTime + 3600000 * hongKongOffset);
-
-      torontoTimeEl.textContent = torontoDate.toLocaleString();
-      hongKongTimeEl.textContent = hongKongDate.toLocaleString();
-    }
-
-    /********************************
-     * 8. 调用天气 API，更新多伦多天气
-     ********************************/
-    async function updateWeather() {
-      // 请将此处换成你在 OpenWeatherMap 申请的 API Key
-      const apiKey = "a80f1b215cea845a1ffe52901f0cec38";
-      // 城市名称可自行调整，units=metric 表示摄氏度
-      const url = `https://api.openweathermap.org/data/2.5/weather?q=Toronto&units=metric&lang=zh_tw&appid=${apiKey}`;
-
-      try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("Network response was not ok");
-        const data = await response.json();
-
-        // 解析返回数据
-        const weatherEl = document.getElementById("toronto-weather");
-        const { description, icon } = data.weather[0];
-        const temp = data.main.temp;
-        const feelsLike = data.main.feels_like;
-        const humidity = data.main.humidity;
-        const iconUrl = `https://openweathermap.org/img/wn/${icon}@2x.png`;
-
-        // 动态插入样式化 HTML
-        weatherEl.innerHTML = `
-          <div style="
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #f0f0f0;
-            border-radius: 8px;
-            padding: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          ">
-            <img src="${iconUrl}" alt="Weather Icon" style="width: 50px; height: 50px;">
-            <div style="line-height: 1.4;">
-              <strong style="text-transform: capitalize;">${description}</strong><br>
-              Temperature: ${temp}°C (Feels like: ${feelsLike}°C)<br>
-              Humidity: ${humidity}%
+      async function updateWeather() {
+        const apiKey = "a80f1b215cea845a1ffe52901f0cec38";
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=Toronto&units=metric&lang=zh_tw&appid=${apiKey}`;
+        try {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error("Network response was not ok");
+          const data = await response.json();
+          const weatherEl = document.getElementById("toronto-weather");
+          const { description, icon } = data.weather[0];
+          const temp = data.main.temp;
+          const feelsLike = data.main.feels_like;
+          const humidity = data.main.humidity;
+          const iconUrl = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+          weatherEl.innerHTML = `
+            <div style="
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              background: #f0f0f0;
+              border-radius: 8px;
+              padding: 10px;
+              box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            ">
+              <img src="${iconUrl}" alt="Weather Icon" style="width: 50px; height: 50px;">
+              <div style="line-height: 1.4;">
+                <strong style="text-transform: capitalize;">${description}</strong><br>
+                Temperature: ${temp}°C (Feels like: ${feelsLike}°C)<br>
+                Humidity: ${humidity}%
+              </div>
             </div>
-          </div>
-        `;
-      } catch (error) {
-        console.error("Error fetching weather data:", error);
+          `;
+        } catch (error) {
+          console.error("Error fetching weather data:", error);
+        }
       }
     }
   </script>
