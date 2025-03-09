@@ -1,142 +1,136 @@
-/* 全局：移除默认边距，使用flex布局分成三列 */
-body {
+/***************************************************
+ *  全局布局：三栏 (左侧栏、主内容、右侧栏)
+ ***************************************************/
+ body {
     margin: 0;
     padding: 0;
-    display: flex;            /* 让 body 里各块并排 */
-    gap: 20px;                /* 左右栏与主内容的间距 */
+    display: flex;
+    gap: 20px;
     font-family: Arial, sans-serif;
     background-color: #f8f9fa;
-}
-
-/* 左侧、右侧边栏：固定宽度或可用百分比 */
-/* 左侧栏整体 */
-.sidebar-left {
-    width: 20%;
-    background-color: #f5f5f5;       /* 更浅的灰色背景 */
-    padding-left: 100px;
-    box-sizing: border-box;
-    display: flex;                  /* 让内部可以按列排列 */
-    flex-direction: column;
-    align-items: stretch;
-    gap: 15px;                      /* 卡片之间的间距 */
   }
   
-  /* 时间卡片 & 天气卡片的通用风格 */
+  /* 左侧栏、右侧栏 */
+  .sidebar-left {
+    width: 20%;
+    background-color: #ffffff;
+    padding: 50px;
+    box-sizing: border-box;
+  }
+  .sidebar-right {
+    width: 20%;
+    background-color: #ffffff;
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  
+  /* 中间主内容区 */
+  .main-content {
+    flex: 1;
+    padding: 10px;
+    box-sizing: border-box;
+    text-align: center;
+  }
+  
+  /***************************************************
+   *  左侧卡片样式 (时间、天气)
+   ***************************************************/
   .time-section,
   .weather-section {
-    background-color: #ffffff;      /* 白色卡片 */
-    border-radius: 8px;             /* 圆角 */
+    background-color: #ffffff;
+    border-radius: 8px;
     padding: 15px;
     box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    margin-bottom: 15px;
   }
-  
-  /* 卡片标题 */
   .time-section h2,
   .weather-section h2 {
     margin-top: 0;
     margin-bottom: 10px;
     font-size: 18px;
     color: #333;
-    border-bottom: 1px solid #eee;  /* 标题下方细线 */
+    border-bottom: 1px solid #eee;
     padding-bottom: 5px;
   }
-  
-  /* 时间文本 */
   .time-display {
     font-size: 16px;
     color: #555;
     margin-top: 5px;
   }
   
-  /* 可以额外给天气做点小修饰 */
-  .weather-section {
-    position: relative;  /* 若想放天气图标，可在此处做绝对定位 */
+  /***************************************************
+   *  标题样式
+   ***************************************************/
+  h1, h2 {
+    margin: 0 0 10px 0;
   }
   
-.sidebar-right {
-    width: 20%;              /* 可根据需要调整，或用固定 px */
-    background-color: #f8f9fa;
-    padding: 10px;
-    box-sizing: border-box;
-    text-align: left;        /* 左侧/右侧栏一般左对齐 */
-}
-
-/* 中间主内容区域：自适应剩余宽度 */
-.main-content {
-    flex: 1;
-    padding: 10px;
-    box-sizing: border-box;
-    text-align: center;      /* 仅中间内容居中 */
-}
-
-/* 标题样式 */
-h1 {
-    color: #333;
-    margin: 0 0 10px;
-}
-
-/* 下拉菜单 */
-select {
-    font-size: 16px;
-    padding: 5px;
-}
-
-/* 待办容器 */
-.todo-container {
-    max-width: 400px;
-    margin: 0 auto;          /* 水平居中 */
-    background: white;
+  /***************************************************
+   *  To-Do 容器与元素
+   ***************************************************/
+  .todo-container {
+    max-width: 500px;
+    margin: 0 auto;
+    background: #fff;
     padding: 20px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
     border-radius: 5px;
-}
-
-/* 去掉 ul 默认的圆点与内边距 */
-ul {
+  }
+  .todo-container label {
+    font-weight: bold;
+  }
+  
+  /* 输入框和按钮 */
+  #taskInput {
+    width: 70%;
+    padding: 6px;
+    box-sizing: border-box;
+  }
+  #addBtn {
+    background-color: #ff4d4d;
+    color: #fff;
+    border: none;
+    padding: 7px 12px;
+    cursor: pointer;
+    margin-left: 5px;
+  }
+  
+  /* 待办列表 ul/li */
+  ul {
     list-style-type: none;
     padding: 0;
-    margin: 0;
-}
-
-/* 单条任务列表项 */
-li {
+    margin-top: 10px;
+  }
+  li {
+    background: #f0f0f0;
+    margin: 5px 0;
+    padding: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px;
-    border-bottom: 1px solid #ddd;
-}
-
-/* 所有按钮 */
-button {
-    background-color: #ff4d4d;
-    color: white;
+  }
+  li button {
+    background-color: #dc3545;
+    color: #fff;
     border: none;
     padding: 5px 10px;
     cursor: pointer;
-}
-
-/* 输入框 */
-input {
-    padding: 8px;
-    width: 80%;
-    box-sizing: border-box;
-}
-
-/* 如果你在右侧要用一个表格 (Habit Scorecard) */
-table {
+  }
+  
+  /***************************************************
+   *  Habit Scorecard 表格
+   ***************************************************/
+  table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 10px;
-}
-
-table th,
-table td {
+  }
+  table th, table td {
     border: 1px solid #ddd;
     padding: 6px;
     text-align: left;
-}
-
-table th {
+  }
+  table th {
     background-color: #eee;
-}
+  }
+  
