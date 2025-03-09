@@ -1,136 +1,258 @@
-/***************************************************
- *  全局布局：三栏 (左侧栏、主内容、右侧栏)
- ***************************************************/
- body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    gap: 20px;
-    font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
-  }
-  
-  /* 左侧栏、右侧栏 */
-  .sidebar-left {
-    width: 20%;
-    background-color: #ffffff;
-    padding: 50px;
-    box-sizing: border-box;
-  }
-  .sidebar-right {
-    width: 20%;
-    background-color: #ffffff;
-    padding: 10px;
-    box-sizing: border-box;
-  }
-  
-  /* 中间主内容区 */
-  .main-content {
-    flex: 1;
-    padding: 10px;
-    box-sizing: border-box;
-    text-align: center;
-  }
-  
-  /***************************************************
-   *  左侧卡片样式 (时间、天气)
-   ***************************************************/
-  .time-section,
-  .weather-section {
-    background-color: #ffffff;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
-    margin-bottom: 15px;
-  }
-  .time-section h2,
-  .weather-section h2 {
-    margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 18px;
-    color: #333;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
-  }
-  .time-display {
-    font-size: 16px;
-    color: #555;
-    margin-top: 5px;
-  }
-  
-  /***************************************************
-   *  标题样式
-   ***************************************************/
-  h1, h2 {
-    margin: 0 0 10px 0;
-  }
-  
-  /***************************************************
-   *  To-Do 容器与元素
-   ***************************************************/
-  .todo-container {
-    max-width: 500px;
-    margin: 0 auto;
-    background: #fff;
-    padding: 20px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    border-radius: 5px;
-  }
-  .todo-container label {
-    font-weight: bold;
-  }
-  
-  /* 输入框和按钮 */
-  #taskInput {
-    width: 70%;
-    padding: 6px;
-    box-sizing: border-box;
-  }
-  #addBtn {
-    background-color: #ff4d4d;
-    color: #fff;
-    border: none;
-    padding: 7px 12px;
-    cursor: pointer;
-    margin-left: 5px;
-  }
-  
-  /* 待办列表 ul/li */
-  ul {
-    list-style-type: none;
-    padding: 0;
-    margin-top: 10px;
-  }
-  li {
-    background: #f0f0f0;
-    margin: 5px 0;
-    padding: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  li button {
-    background-color: #dc3545;
-    color: #fff;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-  }
-  
-  /***************************************************
-   *  Habit Scorecard 表格
-   ***************************************************/
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-  }
-  table th, table td {
-    border: 1px solid #ddd;
-    padding: 6px;
-    text-align: left;
-  }
-  table th {
-    background-color: #eee;
-  }
-  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Three-Column Layout (Flex)</title>
+  <style>
+    /***************************************************
+     * 基础样式
+     ***************************************************/
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f8f9fa;
+    }
+
+    /***************************************************
+     * 三栏容器
+     ***************************************************/
+    .page-container {
+      display: flex;
+      /* gap: 栏与栏之间的间距，可以自由调整 */
+      gap: 20px;
+      /* 限制整体最大宽度，避免超宽屏时右侧空白过多 */
+      max-width: 1200px;
+      /* 居中容器 */
+      margin: 0 auto;
+      /* 容器内边距，可自行调整或去掉 */
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    /***************************************************
+     * 三栏公共样式
+     ***************************************************/
+    .sidebar-left,
+    .main-content,
+    .sidebar-right {
+      background-color: #ffffff;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    /* 左栏和右栏各占 1 份，中间栏占 2 份 */
+    .sidebar-left {
+      flex: 1;
+    }
+    .main-content {
+      flex: 2;
+      text-align: center; /* 你想让中间内容居中可保留此行 */
+    }
+    .sidebar-right {
+      flex: 1;
+    }
+
+    /***************************************************
+     * 左侧卡片样式 (时间、天气)
+     ***************************************************/
+    .time-section,
+    .weather-section {
+      background-color: #ffffff;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      margin-bottom: 15px;
+    }
+    .time-section h2,
+    .weather-section h2 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: #333;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .time-display {
+      font-size: 16px;
+      color: #555;
+      margin-top: 5px;
+    }
+
+    /***************************************************
+     * 标题样式
+     ***************************************************/
+    h1, h2 {
+      margin: 0 0 10px 0;
+    }
+
+    /***************************************************
+     * To-Do 容器与元素
+     ***************************************************/
+    .todo-container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+    }
+    .todo-container label {
+      font-weight: bold;
+    }
+
+    /* 输入框和按钮 */
+    #taskInput {
+      width: 70%;
+      padding: 6px;
+      box-sizing: border-box;
+    }
+    #addBtn {
+      background-color: #ff4d4d;
+      color: #fff;
+      border: none;
+      padding: 7px 12px;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+
+    /* 待办列表 ul/li */
+    ul {
+      list-style-type: none;
+      padding: 0;
+      margin-top: 10px;
+    }
+    li {
+      background: #f0f0f0;
+      margin: 5px 0;
+      padding: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    li button {
+      background-color: #dc3545;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+
+    /***************************************************
+     * Habit Scorecard 表格
+     ***************************************************/
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 6px;
+      text-align: left;
+    }
+    table th {
+      background-color: #eee;
+    }
+
+    /***************************************************
+     * 登录页面样式（如需单独页面可提取）
+     ***************************************************/
+    .login-container {
+      max-width: 300px;
+      margin: 100px auto;
+      padding: 20px;
+      background-color: #fff;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      border-radius: 5px;
+      text-align: center;
+    }
+    .login-container input {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+      box-sizing: border-box;
+    }
+    .login-container button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+    .login-container #loginMessage {
+      margin-top: 10px;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <!-- 三栏容器 -->
+  <div class="page-container">
+    <!-- 左侧栏 -->
+    <div class="sidebar-left">
+      <div class="time-section">
+        <h2>Time Section</h2>
+        <div class="time-display">Toronto Time: 3/10/2025, 9:52 PM</div>
+        <div class="time-display">Hong Kong Time: 3/11/2025, 9:52 AM</div>
+      </div>
+      <div class="weather-section">
+        <h2>Weather Section</h2>
+        <p>Toronto Weather: Temperature 6.3°C (Feels like 1°C), Humidity 53%</p>
+      </div>
+    </div>
+
+    <!-- 中间主内容区 -->
+    <div class="main-content">
+      <h1>To-Do List (Firebase)</h1>
+      <div class="todo-container">
+        <label for="taskInput">新事项日期：</label>
+        <input type="date" id="taskInput" />
+        <button id="addBtn">Add</button>
+        <ul id="todoList">
+          <li>
+            示例任务
+            <button>Delete</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 右侧栏 -->
+    <div class="sidebar-right">
+      <h2>Habit Scorecard</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Cue</th>
+            <th>Craving</th>
+            <th>Response</th>
+            <th>Reward</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>示例 Cue</td>
+            <td>示例 Craving</td>
+            <td>示例 Response</td>
+            <td>示例 Reward</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 如果需要登录页面，可单独放在另一个文件或同页不同位置 -->
+  <!--
+  <div class="login-container">
+    <h2>Login</h2>
+    <input type="text" placeholder="Username" />
+    <input type="password" placeholder="Password" />
+    <button>Login</button>
+    <div id="loginMessage"></div>
+  </div>
+  -->
+</body>
+</html>
