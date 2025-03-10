@@ -171,7 +171,7 @@
         const hongKongTimeEl = document.getElementById("hongkong-time");
         const now = new Date();
         const utcTime = now.getTime() + now.getTimezoneOffset() * 60000;
-        const torontoOffset = -5;
+        const torontoOffset = -4;
         const hongKongOffset = 8;
         const torontoDate = new Date(utcTime + 3600000 * torontoOffset);
         const hongKongDate = new Date(utcTime + 3600000 * hongKongOffset);
