@@ -43,14 +43,15 @@
 
     /* 左栏和右栏各占 1 份，中间栏占 2 份 */
     .sidebar-left {
-      flex: 1;
+      flex: 0.5;
     }
     .main-content {
       flex: 2;
       text-align: center; /* 你想让中间内容居中可保留此行 */
     }
     .sidebar-right {
-      flex: 1;
+      flex: 2;
+      text-align: center;
     }
 
     /***************************************************
@@ -206,7 +207,7 @@
 
     <!-- 中间主内容区 -->
     <div class="main-content">
-      <h1>To-Do List (Firebase)</h1>
+      <h1>Syca's To-Do List </h1>
       <div class="todo-container">
         <label for="taskInput">新事项日期：</label>
         <input type="date" id="taskInput" />
@@ -226,6 +227,7 @@
       <table>
         <thead>
           <tr>
+            <th>Habit</th>
             <th>Cue</th>
             <th>Craving</th>
             <th>Response</th>
@@ -234,6 +236,7 @@
         </thead>
         <tbody>
           <tr>
+            <th>示例 Habit</th>
             <td>示例 Cue</td>
             <td>示例 Craving</td>
             <td>示例 Response</td>
